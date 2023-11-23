@@ -114,6 +114,11 @@ include buildsystem/Makefile.comp.gcc-paranoia
 include buildsystem/Makefile.gen.libs
 endif
 
+ifeq ($(SYSTYPE),"rusty")
+include buildsystem/Makefile.comp.rusty
+include buildsystem/Makefile.path.rusty
+endif
+
 ifeq ($(SYSTYPE),"SuperMUC-NG")
 include buildsystem/Makefile.comp.supermuc-ng
 include buildsystem/Makefile.path.supermuc-ng
