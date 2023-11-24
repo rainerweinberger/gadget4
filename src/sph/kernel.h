@@ -37,6 +37,7 @@ struct kernel_hydra
   double mf_i, mf_j, mf_Ind, mj_r;
   double dBx, dBy, dBz;
   double b2_i, b2_j;
+  double alfven2_i, alfven2_j; 
 #endif
 };
 
