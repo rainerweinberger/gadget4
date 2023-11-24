@@ -85,7 +85,7 @@ SELFGRAVITY                                   # switch to enable self-gravity of
 #TIMEDEP_ART_VISC                             # enables time dependend viscosity
 #HIGH_ART_VISC_START                          # start with high rather than low viscosity
 #NO_SHEAR_VISCOSITY_LIMITER                   # turns of the shear viscosity supression
-
+#TIMEDEP_ART_COND                             # enables time dependent artificial conductivity
 
 #--------------------------------------- Extra physics
 

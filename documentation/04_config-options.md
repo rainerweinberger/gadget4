@@ -725,6 +725,11 @@ Turns of the shear viscosity suppression.
 
 -------
 
+**TIMEDEP_ART_COND**
+
+Turns on the tim-dependent artifificial conductivity
+
+-------
 
 Extra physics                                             {#physics}
 =============

@@ -750,6 +750,35 @@ a time-dependent viscosity is enabled.
 
 -------
 
+**ArtCondConstant**  1.0
+
+This sets the value of the artificial conductivity parameter alpha_cond
+as used by GADGET-4, which will help with fluid mixing instanbilities and
+dissipation at shocks.
+
+-------
+
+**ArtCondMin** 
+
+This sets the minimum of the artifical conductivity parameter when
+a time-dependent conductivity is enabled.
+
+-------
+
+**ArtMagDissipationConstant**  1.0
+
+This sets the value of the artifical magnetic dissipation alpha_mag
+as used by GADGET-4, which will help with magnetized shocks.
+
+-------
+
+**ArtMagDissipationMin**
+
+This sets the minimum of the artifical magntic dissipation parameter when
+a time-dependent magentic dissipation is enabled.
+
+-------
+
 Gravitational softening                                   {#softening}
 =======================
 
