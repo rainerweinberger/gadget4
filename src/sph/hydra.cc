@@ -983,20 +983,23 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               kernel.vsig = kernel.sound_i + kernel.sound_j;
 #ifdef MHD
 #ifdef MAGNETIC_SIGNALVEL
-             double Bpro2_j = (SphP_j->BPred[0] * kernel.dx + SphP_j->BPred[1] * kernel.dy + SphP_j->BPred[2] * kernel.dz) / kernel.r;
+//UPS: Below should be eq. 139 of Price (2012). 
 
+              double Bpro2_j = (SphP_j->BPred[0] * kernel.dx + SphP_j->BPred[1] * kernel.dy + SphP_j->BPred[2] * kernel.dz) / kernel.r;
               Bpro2_j *= Bpro2_j;
-              double  magneticspeed_j = sqrt(0.5 * (vcsa2_j + sqrt(DMAX((vcsa2_j * vcsa2_j -
-                                                                                4 * kernel.sound_j *
-                                                                                kernel.sound_j * Bpro2_j *
-                                                                                MU0_INV / SphP_j->Density),
-                                                                                        (double)0))));
-              double Bpro2_i = (SphP_i->BPred[0] * kernel.dx + SphP_i->BPred[1] * kernel.dy + SphP_i->BPred[2] * kernel.dz) / kernel.r;
+	      double Bfac_j = (vcsa2_j * vcsa2_j - 4 * kernel.sound_j * kernel.sound_j * Bpro2_j * MU0_INV / SphP_j->Density);
+	      if (Bfac_j < 0.0)
+	        Bfac_j = 0.0;
+	        
+              double  magneticspeed_j = sqrt(0.5 * (vcsa2_j + sqrt(Bfac_j)));
+              
+	      double Bpro2_i = (SphP_i->BPred[0] * kernel.dx + SphP_i->BPred[1] * kernel.dy + SphP_i->BPred[2] * kernel.dz) / kernel.r;
               Bpro2_i *= Bpro2_i;
-              double magneticspeed_i = sqrt(0.5 * (vcsa2_i + sqrt(DMAX((vcsa2_i * vcsa2_i -
-                                                                                4 * kernel.sound_i *
-                                                                                kernel.sound_i * Bpro2_i *
-                                                                                         MU0_INV / SphP_i->Density), (double)0))));
+	      double Bfac_i = (vcsa2_i * vcsa2_i - 4 * kernel.sound_i * kernel.sound_i * Bpro2_j * MU0_INV / SphP_i->Density);
+              if (Bfac_i < 0.0)
+                Bfac_i = 0.0;
+
+	      double magneticspeed_i = sqrt(0.5 * (vcsa2_i + sqrt(Bfac_i)));
               kernel.vsig = magneticspeed_i + magneticspeed_j;
 #endif
 #endif
