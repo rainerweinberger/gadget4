@@ -996,7 +996,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               double magneticspeed_i = sqrt(0.5 * (vcsa2_i + sqrt(DMAX((vcsa2_i * vcsa2_i -
                                                                                 4 * kernel.sound_i *
                                                                                 kernel.sound_i * Bpro2_i *
-                                                                                         MU0_INV / SphP_i->.Density), (double)0))));
+                                                                                         MU0_INV / SphP_i->Density), (double)0))));
               kernel.vsig = magneticspeed_i + magneticspeed_j;
 #endif
 #endif
