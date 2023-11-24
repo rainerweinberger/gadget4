@@ -145,6 +145,11 @@ void snap_io::init_basic(simparticles *Sp_ptr)
              NULL, GAS_ONLY, 1, -3., 2., -3., 1., 0., 1);
 #endif
 
+#if defined(TIMEDEP_ART_COND) && defined(OUTPUT_CONDUCTIVITY_PARAMETER)
+  init_field("ACND", "ArtificialConductivityParameter", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, READ_IF_PRESENT, 1, A_SPHP, &Sp->SphP[0].Calpha,
+             NULL, GAS_ONLY, 1, -3., 2., -3., 1., 0., 1);
+#endif
+
 #ifdef OUTPUT_ENTROPY
   init_field("ENTR", "Entropy", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, READ_IF_PRESENT, 1, A_SPHP, &Sp->SphP[0].Entropy, 0,
              GAS_ONLY, /* particle entropy */
