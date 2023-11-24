@@ -727,9 +727,55 @@ Turns of the shear viscosity suppression.
 
 **TIMEDEP_ART_COND**
 
-Turns on the tim-dependent artifificial conductivity
+Turns on the time-dependent artifificial conductivity
 
 -------
+
+Magnetohydrodynamics                                      {#MHD}
+=============
+
+**MHD**
+
+This is the master switch for enabling the use of magnetic field in SPH simualtions. 
+The code will add the appropriate the MHD force terms to the pressure gradient udpates
+and solve for the induction equation by using the MHD-stress tensor (e.g. eq 149 of Price 2012). 
+The code will also enable to use of the magentic signal velocity for the timestepping based on 
+eq. 132 of Price (2012). Additionally, the code will apply a Tensile correction scheme following 
+Borve et al. (2001) to avoid unphysical particle clumping in low beta Plasmas. I.e. the appropriate
+correction terms for the momentum equation and the energy equation are made to stabalize the MHD
+scheme. This means that the code will apply a Powell et al. (1999) divergence preserving scheme 
+in this mode without correction to the induction equation.
+
+-------
+
+**BINISET**
+
+This swithc is used to set a globally constant magentic field in simualtions based on the paramtefile 
+options BiniX, BiniY and BiniZ for the x, y and z components of the magnetic field. 
+
+-------
+
+**DIVBCLEANING**
+
+This switch enables the use of the constrained divergence cleanign scheme of Tricco, Price and Bate (2016)
+which allows typically for a few orders of magnitude improvement in preserving numerical errors when directly 
+compared to the default Powell scheme when MHD is active. The method is based on an energy conserving variant
+of the Dedner et al. (2002) scheme that will greatly improve numerical satbility of the solver at 
+essnetially no computational overhead.   
+
+-------
+
+**MU0_UNITY**
+
+Sets the magentic permeability constant to 1. This should only be used for MHD-test cases and should always be
+inactive in production runs. 
+
+-------
+
+**TIMEDEP_MAGN_DISP**
+
+Turns on the time-dependent artifificial magnetic resistivity. Needed for improved results on MHD shocks. 
+
 
 Extra physics                                             {#physics}
 =============
