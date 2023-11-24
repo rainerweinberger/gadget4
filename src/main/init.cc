@@ -402,24 +402,24 @@ void sim::init(int RestartSnapNum)
 
 #ifdef MHD
 #ifdef BINISET
-      if(RestartFlag == RST_BEGIN)
-        {                       /* Set only when starting from ICs */
-          SphP[i].BPred[0] = All.BiniX;
-          SphP[i].BPred[1] = All.BiniY;
-          SphP[i].BPred[2] = All.BiniZ;
-        }
+     if(RestartFlag == RST_BEGIN)
+       {                       /* Set only when starting from ICs */
+         Sp.SphP[i].BPred[0] = All.BiniX;
+         Sp.SphP[i].BPred[1] = All.BiniY;
+         Sp.SphP[i].BPred[2] = All.BiniZ;
+       }
 #endif /*BINISET*/
-        for(j = 0; j < 3; j++)
-        {
-          SphP[i].BPred[j] *= a2_fac * gauss2gadget;
-          SphP[i].B[j] = SphP[i].BPred[j];
+     for(int j = 0; j < 3; j++)
+       {
+          Sp.SphP[i].BPred[j] *= a2_fac * gauss2gadget;
+          Sp.SphP[i].B[j] = Sp.SphP[i].BPred[j];
         }
 #ifdef TIMEDEP_MAGN_DISP
-      SphP[i].Balpha = All.ArtMagDispMin;
-      SphP[i].DtBalpha = 0.0;
+     Sp.SphP[i].Balpha = All.ArtMagDispMin;
+     Sp.SphP[i].DtBalpha = 0.0;
 #endif
 #ifdef DIVBCLEANING
-      SphP[i].Phi = SphP[i].PhiPred = SphP[i].DtPhi = 0.0;
+     Sp.SphP[i].Phi = Sp.SphP[i].PhiPred = Sp.SphP[i].DtPhi = 0.0;
 #endif
 #endif //MHD
     }
