@@ -148,6 +148,16 @@ void global_data_all_processes::register_parameters(void)
 #ifdef TIMEDEP_ART_VISC
   add_param("ViscosityAlphaMin", &AlphaMin, PARAM_DOUBLE, PARAM_CHANGEABLE);
 #endif
+#if defined(CONST_ART_COND) || defined(TIMEDEP_ART_COND)
+  add_param("ArtCondConstant", &ArtCondConstant, PARAM_DOUBLE, PARAM_CHANGEABLE);
+#endif
+#ifdef TIMEDEP_ART_COND
+  add_param("ArtCondMin", &ArtCondMin, PARAM_DOUBLE, PARAM_CHANGEABLE);
+#endif
+#ifdef TIMEDEP_MHD_DISSIPATION
+  add_param("ArtMagDissipationConstant", &ArtMagDissipationConstant, PARAM_DOUBLE, PARAM_CHANGEABLE);
+  add_param("ArtMagDissipationMin", &ArtMagDissipationMin, PARAM_DOUBLE, PARAM_CHANGEABLE);
+#endif 
 
 #ifdef SUBFIND
   add_param("DesLinkNgb", &DesLinkNgb, PARAM_INT, PARAM_CHANGEABLE);

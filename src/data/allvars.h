@@ -23,6 +23,10 @@
 #include "../data/macros.h"
 #include "../io/parameters.h"
 
+#ifdef MDH
+#define MAGNETIC_SIGNALVEL
+#endif
+
 /** Data which is the SAME for all tasks (mostly code parameters read
  * from the parameter file).  Holding this data in a structure is
  * convenient for writing/reading the restart file, and it allows the
@@ -82,7 +86,25 @@ struct global_data_all_processes : public parameters
 #ifdef TIMEDEP_ART_VISC
   double AlphaMin; /*!< Minimum of allowed viscosity parameter */
 #endif
+#if defined(CONST_ART_COND) || defined(TIMEDEP_ART_COND)
+  double ArtCondConstant;
+#endif
+#ifdef TIMEDEP_ART_COND
+  double ArtCondMin;
+#endif
 
+#ifdef MHD
+#ifdef BINISET
+  double BiniX;
+  double BiniY;
+  double BiniZ;
+#endif
+#ifdef TIMEDEP_MHD_DISSIPATION
+  double ArtMagDissipationConstant;
+  double ArtMagDissipationMin;
+#endif
+#endif
+  
 #ifdef SUBFIND
   int DesLinkNgb;
 #endif
