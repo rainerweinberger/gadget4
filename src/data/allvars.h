@@ -23,8 +23,11 @@
 #include "../data/macros.h"
 #include "../io/parameters.h"
 
-#ifdef MDH
+#ifdef MHD
 #define MAGNETIC_SIGNALVEL
+#ifndef DIVBFORCE 
+#define DIVBFORCE 1
+#endif
 #endif
 
 /** Data which is the SAME for all tasks (mostly code parameters read
