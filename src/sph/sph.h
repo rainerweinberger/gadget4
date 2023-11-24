@@ -85,6 +85,22 @@ class sph : public ngbtree
 #ifdef TIMEDEP_ART_VISC
     MyDouble Csnd;
 #endif
+#ifdef TIMEDEP_ART_COND
+   MyFloat Calpha;
+   MyFloat *GradA;
+   MyFloat EntropyPred;
+   MyFloat Density;
+#ifdef SELFGRAVITY
+   MyFloat Climit;
+   MyFloat *Cgrav;
+#endif
+#endif
+
+#ifdef MHD
+   MyFloat *BPred;
+   MyFloat *RotB; // Curl of BPred. This is \mathbf{J} = \nabla \times \mathbf{B} modulo mu_0 
+   MyFloat DivB;   // Divergence of the magnetic field.
+#endif 
   };
 
   ngbdata_density *Ngbdensdat;

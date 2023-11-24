@@ -20,6 +20,9 @@ struct kernel_density
   double wk, dwk;
   double hinv, hinv3, hinv4;
   double mj_wk, mj_dwk_r;
+#ifdef MHD
+  double dB[NUMDIMS];
+#endif
 };
 
 struct kernel_hydra
@@ -29,6 +32,12 @@ struct kernel_hydra
   double dvx, dvy, dvz, vdotr2;
   double wk_i, wk_j, dwk_i, dwk_j;
   double h_i, h_j, dwk_ij, rho_ij_inv;
+  
+#ifdef MHD
+  double mf_i, mf_j, mf_Ind, mj_r;
+  double dBx, dBy, dBz;
+  double b2_i, b2_j;
+#endif
 };
 
 #if !defined(CUBIC_SPLINE_KERNEL) && !defined(WENDLAND_C2_KERNEL) && !defined(WENDLAND_C4_KERNEL) && !defined(WENDLAND_C6_KERNEL)
