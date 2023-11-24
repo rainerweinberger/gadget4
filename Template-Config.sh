@@ -82,10 +82,18 @@ SELFGRAVITY                                   # switch to enable self-gravity of
 
 #--------------------------------------- SPH viscosity options
 
-#TIMEDEP_ART_VISC                             # enables time dependend viscosity
+#TIMEDEP_ART_VISC                             # enables time dependent viscosity
 #HIGH_ART_VISC_START                          # start with high rather than low viscosity
 #NO_SHEAR_VISCOSITY_LIMITER                   # turns of the shear viscosity supression
 #TIMEDEP_ART_COND                             # enables time dependent artificial conductivity
+
+#--------------------------------------- SPMHD options
+
+#MHD                                          # Magnetohydrodynamics master switch, enables the basic MHD force updates and divergence corrections 
+#BINISET                                      # enables the initialization of the magentic field ICs in the parameterfile (BiniX, BiniY, BiniZ)
+#DIVBCLEANING                                 # enables the fancy constraint divergence cleaning of Tricco & Price (2016)
+#MU0_UNITY                                    # Sets the correct unit system for MU0=1. Only use this for MHD test cases
+#TIMEDEP_MAGN_DISP                            # enables the use of time dependent magnetic dissipation to stabalize MHD shocks
 
 #--------------------------------------- Extra physics
 
