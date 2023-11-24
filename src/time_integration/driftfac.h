@@ -32,6 +32,9 @@ class driftfac
   double get_drift_factor(integertime time0, integertime time1);
   double get_gravkick_factor(integertime time0, integertime time1);
   double get_hydrokick_factor(integertime time0, integertime time1);
+#ifdef MHD
+  double get_magkick_factor(integertime time0, integertime time1);
+#endif
   double get_comoving_distance(integertime time0);
   double get_comoving_distance_for_scalefactor(double ascale);
   double get_scalefactor_for_comoving_distance(double dist);
@@ -62,6 +65,11 @@ class driftfac
   /** table for the cosmological kick factor for hydrodynmical forces */
   double HydroKickTable[DRIFT_TABLE_LENGTH];
 
+#ifdef MHD
+  /** table for the cosmological kick factor for induction equation */
+  double MagKickTable[DRIFT_TABLE_LENGTH];
+#endif
+
   double logTimeBegin;
   double logTimeMax;
 
@@ -88,6 +96,16 @@ class driftfac
 
     return 1 / (h * pow(a, 3 * GAMMA_MINUS1) * a);
   }
+
+#ifdef MHD
+  static double magkick_integ(double a, void *param)
+  {
+
+  double h = hubble_function(a);
+
+  return 1 / (h * a * a * a);
+  }
+#endif  
 
   static double growth_simple_int(const double a, void *param)
   {

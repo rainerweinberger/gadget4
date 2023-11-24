@@ -462,7 +462,7 @@ void sim::do_hydro_step_first_half(void)
     }
 
   /* now we can calculate the hydro forces */
-  hydro_force(FIRST_HALF_STEP); /* computes hydrodynamical accelerations and rate of chnange of entropy,
+  hydro_force(FIRST_HALF_STEP); /* computes hydrodynamical accelerations and rate of change of entropy,
                                    and applies this where appropriate directly (half step kicks)  */
 }
 
@@ -553,6 +553,17 @@ void sim::hydro_force(int step_indicator)
       Sp.P[target].Vel[0] += Sp.SphP[target].HydroAccel[0] * dt_hydrokick;
       Sp.P[target].Vel[1] += Sp.SphP[target].HydroAccel[1] * dt_hydrokick;
       Sp.P[target].Vel[2] += Sp.SphP[target].HydroAccel[2] * dt_hydrokick;
+#ifdef MHD
+     double dt_mag;
+     if(All.ComovingIntegrationOn)
+       dt_mag = Driftfac.get_magkick_factor(tstart, tend);
+     else
+       dt_mag = (tend - tstart) * All.Timebase_interval; 
+     
+     Sp.SphP[target].B[0] += Sp.SphP[target].dBdt[0] * dt_mag;
+     Sp.SphP[target].B[1] += Sp.SphP[target].dBdt[1] * dt_mag;
+     Sp.SphP[target].B[2] += Sp.SphP[target].dBdt[2] * dt_mag;
+#endif
 
       if(step_indicator == SECOND_HALF_STEP)
         {
@@ -566,6 +577,11 @@ void sim::hydro_force(int step_indicator)
           Sp.SphP[target].VelPred[1] += (Sp.SphP[target].HydroAccel[1] - Old[i].HydroAccel[1]) * dt_hydrokick;
           Sp.SphP[target].VelPred[2] += (Sp.SphP[target].HydroAccel[2] - Old[i].HydroAccel[2]) * dt_hydrokick;
 
+#ifdef MHD
+         Sp.SphP[target].BPred[0] = Sp.SphP[target].B[0];
+         Sp.SphP[target].BPred[1] = Sp.SphP[target].B[1];
+          Sp.SphP[target].BPred[2] = Sp.SphP[target].B[2]; 
+#endif
           /* note: if there is no gravity, we should instead set VelPred = Vel (if this is not done anymore in the gravity
            * routine)
            */

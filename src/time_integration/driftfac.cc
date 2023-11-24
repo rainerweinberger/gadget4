@@ -54,6 +54,13 @@ void driftfac::init_drift_table(void)
       gsl_integration_qag(&F, exp(logTimeBegin), exp(logTimeBegin + ((logTimeMax - logTimeBegin) / DRIFT_TABLE_LENGTH) * (i + 1)), 0,
                           1.0e-8, WORKSIZE, GSL_INTEG_GAUSS41, workspace, &result, &abserr);
       HydroKickTable[i] = result;
+
+#ifdef MHD
+      F.function = &magkick_integ;
+      gsl_integration_qag(&F, exp(logTimeBegin), exp(logTimeBegin + ((logTimeMax - logTimeBegin) / DRIFT_TABLE_LENGTH) * (i + 1)), 0,
+                          1.0e-8, WORKSIZE, GSL_INTEG_GAUSS41, workspace, &result, &abserr);
+      MagKickTable[i] = result;
+#endif  
     }
 
   gsl_integration_workspace_free(workspace);
@@ -188,6 +195,52 @@ double driftfac::get_hydrokick_factor(integertime time0, integertime time1)
 
   return last_value = (df2 - df1);
 }
+
+#ifdef MHD
+double driftfac::get_magkick_factor(integertime time0, integertime time1)
+{
+
+  static integertime last_time0_magkick = -1, last_time1_magkick = -1;
+  static double last_value_magkick;
+
+  /* last_time0, last_time1 and last_value are now global variables */
+  if(time0 == last_time0_magkick && time1 == last_time1_magkick)
+    return last_value_magkick;
+
+  /* note: will only be called for cosmological integration */
+
+  double a1 = logTimeBegin + time0 * All.Timebase_interval;
+  double a2 = logTimeBegin + time1 * All.Timebase_interval;
+
+  double u1 = (a1 - logTimeBegin) / (logTimeMax - logTimeBegin) * DRIFT_TABLE_LENGTH;
+  int i1    = (int)u1;
+
+  if(i1 >= DRIFT_TABLE_LENGTH)
+    i1 = DRIFT_TABLE_LENGTH - 1;
+  
+  double df1;
+  if(i1 <= 1)
+    df1 = u1 * MagKickTable[0];
+  else
+    df1 = MagKickTable[i1 - 1] + (MagKickTable[i1] - MagKickTable[i1 - 1]) * (u1 - i1);
+
+  double u2 = (a2 - logTimeBegin) / (logTimeMax - logTimeBegin) * DRIFT_TABLE_LENGTH;
+  int i2 = (int) u2;
+  if(i2 >= DRIFT_TABLE_LENGTH)
+    i2 = DRIFT_TABLE_LENGTH - 1;
+  
+  double df2;
+  if(i2 <= 1)
+    df2 = u2 * MagKickTable[0];
+  else
+    df2 = MagKickTable[i2 - 1] + (MagKickTable[i2] - MagKickTable[i2 - 1]) * (u2 - i2);
+
+  last_time0_magkick = time0;
+  last_time1_magkick = time1;
+
+  return last_value_magkick = (df2 - df1);
+}
+#endif
 
 double driftfac::get_comoving_distance(integertime time0)
 {

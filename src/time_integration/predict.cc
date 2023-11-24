@@ -360,17 +360,28 @@ int simparticles::drift_particle(particle_data *P, sph_particle_data *SphP, inte
   if(P->getType() == 0)
     {
       double dt_hydrokick, dt_entr, dt_gravkick;
-
+#ifdef MHD
+      double dt_mag;
+#endif
       if(All.ComovingIntegrationOn)
         {
           dt_entr      = (time1 - time0) * All.Timebase_interval;
           dt_hydrokick = Driftfac.get_hydrokick_factor(time0, time1);
           dt_gravkick  = Driftfac.get_gravkick_factor(time0, time1);
+#ifdef MHD
+          dt_mag = Driftfac.get_magkick_factor(time0, time1);
+#endif	  
         }
       else
-        dt_gravkick = dt_entr = dt_hydrokick = dt_drift;
-
-      for(int j = 0; j < 3; j++)
+        {      
+#ifdef MHD
+          dt_gravkick = dt_entr = dt_hydrokick = dt_mag = dt_drift;
+#else        
+          dt_gravkick = dt_entr = dt_hydrokick = dt_drift;
+#endif
+	}
+      
+	for(int j = 0; j < 3; j++)
         {
           SphP->VelPred[j] += SphP->HydroAccel[j] * dt_hydrokick;
 #ifdef HIERARCHICAL_GRAVITY
@@ -396,6 +407,10 @@ int simparticles::drift_particle(particle_data *P, sph_particle_data *SphP, inte
 #endif
 
       SphP->set_thermodynamic_variables();
+#ifdef MHD
+     for(int j = 0; j < 3; j++)
+        SphP->BPred[j] += SphP->dBdt[j] * dt_mag; 
+#endif
     }
 
   P->Ti_Current = time1;
