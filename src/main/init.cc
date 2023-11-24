@@ -378,8 +378,6 @@ void sim::init(int RestartSnapNum)
 
 #ifdef TIMEDEP_ART_COND
      Sp.SphP[i].Calpha = All.ArtCondMin;
-     for(int j = 0; j < 3; j++)
-        Sp.SphP[i].GradA[j] = 0.0;
 #endif
     }
 
