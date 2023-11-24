@@ -114,6 +114,14 @@ inline void sph::sph_density_check_particle_particle_interaction(pinfo &pdat, in
 #ifdef TIMEDEP_ART_VISC
       Ngbdensdat[n].Csnd = SphP->Csnd;
 #endif
+#ifdef TIMEDEP_ART_COND
+      Ngbdensdat[n].Calpha = SphP->Calpha;
+#endif
+
+#ifdef MHD
+      Ngbdensdat[n].BPred = SphP->BPred;
+#endif
+
     }
   else if(p_type == NODE_TYPE_FETCHED_PARTICLE)
     {
@@ -140,6 +148,13 @@ inline void sph::sph_density_check_particle_particle_interaction(pinfo &pdat, in
 #ifdef TIMEDEP_ART_VISC
       Ngbdensdat[n].Csnd = foreignpoint->SphCore.Csnd;
 #endif
+#ifdef TIMEDEP_ART_COND
+      Ngbdensdat[n].Calpha = foreignpoint->SphCore.Calpha;
+#endif
+
+#ifdef MHD
+      Ngbdensdat[n].BPred = foreignpoint->SphCore.BPred;
+#endif 
     }
   else
     Terminate("unexpected");
@@ -519,11 +534,42 @@ void sph::density(int *list, int ntarget)
                                          SphP[target].Density;
 
                   SphP[target].DivVel /= SphP[target].Density;
+#ifdef MHD
+                  SphP[target].DivB /= SphP[target].Density;
+		  SphP[target].RotB[0] /= SphP[target].Density;
+		  SphP[target].RotB[1] /= SphP[target].Density;
+		  SphP[target].RotB[2] /= SphP[target].Density;
+#endif 
+//below is higher order gradients		  
 #else
                   SphP[target].set_velocity_gradients();
 #endif
                   SphP[target].DtHsml    = (1.0 / NUMDIMS) * SphP[target].DivVel * SphP[target].Hsml;
                   SphP[target].DtDensity = -SphP[target].DivVel * SphP[target].Density;
+
+#ifdef TIMEDEP_ART_COND
+                   //UPS: First oder reconsstruction of the gradient of the internal energy.
+                  double grad_A = sqrt(SphP[target].GradA[0] * SphP[target].GradA[0] + SphP[target].GradA[1] * SphP[target].GradA[1] +
+                                   SphP[target].GradA[2] * SphP[target].GradA[2]) / SphP[target].Density;
+                  //UPS: I don't know where the 1/3 is coming from, I guess from dimensionality. 
+		  SphP[target].Calpha = (1./3.) * SphP[target].Hsml * grad_A / (SphP[target].EntropyPred * pow(SphP[target].Density, GAMMA_MINUS1));
+                  
+		  if(SphP[target].Calpha > All.ArtCondConstant)
+                    SphP[target].Calpha = All.ArtCondConstant;
+                  if(SphP[target].Calpha < All.ArtCondMin)
+                    SphP[target].Calpha = All.ArtCondMin;
+
+#ifdef SELFGRAVITY
+                  if(SphP[target].Climit > 1.0)
+                    SphP[target].Climit = 1.0;
+                  if(SphP[target].Climit < 0.0)
+                    SphP[target].Climit = 0.0;
+
+                  SphP[i].Cgrav[0] /= SphP[target].Density;
+                  SphP[i].Cgrav[1] /= SphP[target].Density;
+                  SphP[i].Cgrav[2] /= SphP[target].Density;
+#endif
+#endif
 
 #ifndef PRESSURE_ENTROPY_SPH
                   SphP[target].set_thermodynamic_variables();
@@ -992,14 +1038,26 @@ void sph::density_evaluate_kernel(pinfo &pdat)
           for(int i = 0; i < NUMDIMS; i++)
             {
               kernel.dv[i] = targetSphP->VelPred[i] - ngb->VelPred[i];
+#ifdef MHD
+              kernel.dB[i] = targetSphP->BPred[i] - ngb->BPred[i]; 
+#endif
             }
 
 #ifndef IMPROVED_VELOCITY_GRADIENTS
           double dpos_times_dv = 0;
           for(int i = 0; i < NUMDIMS; i++)
             dpos_times_dv += kernel.dpos[i] * kernel.dv[i];
+          
+	  targetSphP->DivVel += (-kernel.mj_dwk_r * (dpos_times_dv));
 
-          targetSphP->DivVel += (-kernel.mj_dwk_r * (dpos_times_dv));
+#ifdef MHD
+	  double dpos_times_dB = 0;
+          for(int i = 0; i < NUMDIMS; i++)
+            dpos_times_dB += kernel.dpos[i] * kernel.dB[i];
+
+          targetSphP->DivB += (-kernel.mj_dwk_r * (dpos_times_dB));
+#endif
+
 #ifdef TWODIMS
           targetSphP->Rot[2] += (kernel.mj_dwk_r * (kernel.dpos[1] * kernel.dv[0] - kernel.dpos[0] * kernel.dv[1]));
 #endif
@@ -1008,6 +1066,8 @@ void sph::density_evaluate_kernel(pinfo &pdat)
           targetSphP->Rot[1] += (kernel.mj_dwk_r * (kernel.dpos[0] * kernel.dv[2] - kernel.dpos[2] * kernel.dv[0]));
           targetSphP->Rot[2] += (kernel.mj_dwk_r * (kernel.dpos[1] * kernel.dv[0] - kernel.dpos[0] * kernel.dv[1]));
 #endif
+
+//below is higher order gradients	  
 #else
           for(int i = 0; i < NUMDIMS; i++)
             {
@@ -1039,12 +1099,29 @@ void sph::density_evaluate_kernel(pinfo &pdat)
           double decay_vel;
 
           if(vdotr2 < 0)
-            decay_vel = targetSphP->Csnd + ngb->Csnd - mu_ij;
+            //decay_vel = targetSphP->Csnd + ngb->Csnd - mu_ij;
+	    /* UPS: Cullen & Dehnen use this definition of the signal velocity that they use 
+	            for the decay velocity. */  
+            decay_vel = 0.5 * (targetSphP->Csnd + ngb->Csnd) - mu_ij;
           else
-            decay_vel = targetSphP->Csnd + ngb->Csnd;
+            //decay_vel = targetSphP->Csnd + ngb->Csnd;
+            decay_vel = 0.5 * (targetSphP->Csnd + ngb->Csnd);
 
           if(decay_vel > targetSphP->decayVel)
             targetSphP->decayVel = decay_vel;
+#endif
+#ifdef TIMEDEP_ART_COND
+          targetSphP->GradA[0] += (kernel.mj_dwk_r * kernel.dpos[0] * (ngb->EntropyPred * pow(ngb->Density, GAMMA_MINUS1) -
+                                         targetSphP->EntropyPred * pow(targetSphP->Density, GAMMA_MINUS1)));
+          targetSphP->GradA[1] += (kernel.mj_dwk_r * kernel.dpos[1] * (ngb->EntropyPred * pow(ngb->Density, GAMMA_MINUS1) -
+                                         targetSphP->EntropyPred * pow(targetSphP->Density, GAMMA_MINUS1)));
+          targetSphP->GradA[2] += (kernel.mj_dwk_r * kernel.dpos[2] * (ngb->EntropyPred * pow(ngb->Density, GAMMA_MINUS1) -
+                                         targetSphP->EntropyPred * pow(targetSphP->Density, GAMMA_MINUS1)));
+#endif
+#ifdef MHD 
+         targetSphP->RotB[0] += kernel.mj_dwk_r * (kernel.dpos[2] * kernel.dB[1] - kernel.dpos[1] * kernel.dB[2]);
+         targetSphP->RotB[1] += kernel.mj_dwk_r * (kernel.dpos[0] * kernel.dB[2] - kernel.dpos[2] * kernel.dB[0]);
+         targetSphP->RotB[2] += kernel.mj_dwk_r * (kernel.dpos[1] * kernel.dB[0] - kernel.dpos[0] * kernel.dB[1]);
 #endif
         }
     }

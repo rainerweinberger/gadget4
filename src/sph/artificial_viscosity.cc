@@ -134,36 +134,47 @@ void sph_particle_data::set_velocity_gradients(void)
 #endif
 
 #ifdef TIMEDEP_ART_VISC
+/*UPS: This function is called in density.cc and loops over all (active) particles to forward integrate Alpha.
+       I.e. Alpha below is really Alpha_p which is either set to alpha_tar, if the Alpha from the previous step
+       is smaller than alpha_tar. Otherwise we want to let Alpha decay, but make sure it is never falling below zero. 
+       G3 and Phantom actually trace DAlpha/dt and integrate it (G3 in kicks.c, Phantom with an 
+       backward (implcit) Euler). Might be worth testing in a future iteration. */
 void sph_particle_data::set_viscosity_coefficient(double dt)
 {
   double dDivVel_dt = dt > 0 ? (DivVel - DivVelOld) / (dt) : 0;
   dDivVel_dt *= All.cf_a2inv; //now in physical coordinates
-  double shockIndicator = -dDivVel_dt > 0 ? -dDivVel_dt : 0;
+  double shockIndicator = -dDivVel_dt > 0 ? -dDivVel_dt : 0; //Cullen & Dehnen (2012), shock capturing
   double hsml_p           = Hsml * All.cf_atime;
   double hsml2_p          = hsml_p * hsml_p;
-  double csnd_p           = Csnd * All.cf_afac3;
-  double alpha_tar      = (hsml2_p * shockIndicator) / (hsml2_p * shockIndicator + csnd_p * csnd_p) * All.ArtBulkViscConst;
-
+  double csnd_p           = Csnd * All.cf_afac3; 
+  double decayVel2        = decayVel * decayVel * All.cf_afac3 * All.cf_afac3;
   double DivVel2       = (DivVel * All.cf_a2inv) * (DivVel * All.cf_a2inv);
   double CurlVel2      = (CurlVel * All.cf_a2inv) * (CurlVel * All.cf_a2inv);
   double CsndOverHsml2 = (csnd_p / hsml_p) * (csnd_p / hsml_p);
   double limiter       = DivVel2 / (DivVel2 + CurlVel2 + 0.00001 * CsndOverHsml2);
+  /*UPS: Cullen and Dehnen (2010) take the limiter into the alpha_loc, which is alpha_tar here and take the the decayVel as 
+         instead of the sound speed to estiamte alpha_loc. Thsi seems to reduce post hsock ringing quite a bit. */
+  double alpha_tar        = (hsml2_p * limiter * shockIndicator) / (hsml2_p * limiter * shockIndicator + decayVel2) * All.ArtBulkViscConst;
 #ifdef NO_SHEAR_VISCOSITY_LIMITER
   limiter = 1.;
 #endif
 
   if(Alpha < alpha_tar)
     {
-      Alpha = alpha_tar * limiter;
+      Alpha = alpha_tar;
       return;
     }
 
-  double devayVel_p = decayVel  * All.cf_afac3;  //has the same a factor as sound speed
+  double devayVel_p = decayVel * All.cf_afac3;  //has the same a factor as sound speed
 
-  double DecayTime = 10. * hsml_p / devayVel_p;
-  Alpha            = limiter * (alpha_tar + (Alpha - alpha_tar) * exp(-dt / DecayTime));
-  if(Alpha < All.AlphaMin)
+  //double DecayTime = 10. * hsml_p / devayVel_p; Price et al. (2018), eq. 48
+  double DecayTime = 20. * hsml_p / devayVel_p; //Cullen & Dehnen for AlphaMin=0
+  //Alpha            = limiter * (alpha_tar + (Alpha - alpha_tar) * exp(-dt / DecayTime));
+  Alpha            = (alpha_tar + (Alpha - alpha_tar) * exp(-dt / DecayTime));
+  if(Alpha < All.AlphaMin){
     Alpha = All.AlphaMin;
+    printf("We should never arrive here");
+  }
 }
 
 #endif
