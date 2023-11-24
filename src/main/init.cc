@@ -51,8 +51,14 @@ using namespace std;
  *  initialized or converted and a initial domain decomposition is performed.
  *  If SPH particles are present, the initial SPH smoothing lengths are determined.
  */
+
 void sim::init(int RestartSnapNum)
 {
+
+#ifdef MHD
+   double a2_fac, gauss2gadget = 1.0;
+#endif	
+
 #ifdef NGENIC
   if(All.RestartFlag == RST_CREATEICS || All.RestartFlag == RST_BEGIN)
     {
@@ -277,11 +283,25 @@ void sim::init(int RestartSnapNum)
     {
       All.Timebase_interval = (log(All.TimeMax) - log(All.TimeBegin)) / TIMEBASE;
       All.Ti_Current        = 0;
+#ifdef MHD
+#ifndef MU0_UNITY
+      gauss2gadget *=
+        sqrt(All.UnitTime_in_s * All.UnitTime_in_s * All.UnitLength_in_cm / All.UnitMass_in_g /
+             (All.HubbleParam * All.HubbleParam));
+#endif
+      a2_fac = (All.Time * All.Time);
+#endif
     }
   else
     {
       All.Timebase_interval = (All.TimeMax - All.TimeBegin) / TIMEBASE;
       All.Ti_Current        = 0;
+#ifdef MHD
+#ifndef MU0_UNITY
+      gauss2gadget *= sqrt(All.UnitTime_in_s * All.UnitTime_in_s * All.UnitLength_in_cm / All.UnitMass_in_g);
+#endif
+      a2_fac = 1;
+#endif
     }
 
   All.set_cosmo_factors_for_current_time();
@@ -379,6 +399,29 @@ void sim::init(int RestartSnapNum)
 #ifdef TIMEDEP_ART_COND
      Sp.SphP[i].Calpha = All.ArtCondMin;
 #endif
+
+#ifdef MHD
+#ifdef BINISET
+      if(RestartFlag == RST_BEGIN)
+        {                       /* Set only when starting from ICs */
+          SphP[i].BPred[0] = All.BiniX;
+          SphP[i].BPred[1] = All.BiniY;
+          SphP[i].BPred[2] = All.BiniZ;
+        }
+#endif /*BINISET*/
+        for(j = 0; j < 3; j++)
+        {
+          SphP[i].BPred[j] *= a2_fac * gauss2gadget;
+          SphP[i].B[j] = SphP[i].BPred[j];
+        }
+#ifdef TIMEDEP_MAGN_DISP
+      SphP[i].Balpha = All.ArtMagDispMin;
+      SphP[i].DtBalpha = 0.0;
+#endif
+#ifdef DIVBCLEANING
+      SphP[i].Phi = SphP[i].PhiPred = SphP[i].DtPhi = 0.0;
+#endif
+#endif //MHD
     }
 
 #ifdef RECREATE_UNIQUE_IDS
