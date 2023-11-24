@@ -983,7 +983,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               kernel.vsig = kernel.sound_i + kernel.sound_j;
 #ifdef MHD
 #ifdef MAGNETIC_SIGNALVEL
-//UPS: Below should be eq. 139 of Price (2012). 
+//UPS: Below should be eq. 132 of Price (2012). 
 
               double Bpro2_j = (SphP_j->BPred[0] * kernel.dx + SphP_j->BPred[1] * kernel.dy + SphP_j->BPred[2] * kernel.dz) / kernel.r;
               Bpro2_j *= Bpro2_j;
