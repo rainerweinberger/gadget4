@@ -778,6 +778,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
       dentr += horizontal_add(0.5 * (hfc_visc)*vdotr2);
     }
 
+
   SphP_i->HydroAccel[0] += dacc[0];
   SphP_i->HydroAccel[1] += dacc[1];
   SphP_i->HydroAccel[2] += dacc[2];
@@ -818,6 +819,28 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
   kernel.sound_i = SphP_i->Csnd;
   kernel.h_i     = SphP_i->Hsml;
 
+#ifdef MHD
+  double mf_Ind = 1.0 / SphP_i->Density; 
+  double mf_i = MU0_INV * pow(All.cf_atime, 3 * GAMMA - 2) / (SphP_i->Density * SphP_i->Density);
+#ifdef TIMEDEP_ART_MHD_DISSIPATION
+  double mf_dissInd = SphP_i->Density * All.cf_atime * All.cf_atime;
+  double mf_dissEnt = 0.5 * MU0_INV * All.cf_atime * All.cf_atime;
+#endif
+    kernel.b2_i = SphP_i->BPred[0] * SphP_i->BPred[0] + SphP_i->BPred[1] * SphP_i->BPred[1] + SphP_i->BPred[2] * SphP_i->BPred[2];
+    double mm_i[3][3];
+    for(int k = 0; k < 3; k++)
+      {
+        for(int l = 0; l < 3; l++)
+          mm_i[k][l] = SphP_i->BPred[k] * SphP_i->BPred[l];
+      }
+    for(int k = 0; k < 3; k++)
+      mm_i[k][k] -= 0.5 * kernel.b2_i;
+#ifdef MAGNETIC_SIGNALVEL
+    kernel.alfven2_i = kernel.b2_i * MU0_INV / SphP_i->Density;
+    double vcsa2_i = kernel.sound_i * kernel.sound_i + kernel.alfven2_i;
+#endif
+#endif
+
   /* Now start the actual SPH computation for this particle */
 
   double daccx        = 0;
@@ -856,12 +879,34 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 
               kernel.sound_j = SphP_j->Csnd;
 
+#ifdef MHD
+              double mf_j = MU0_INV * pow(All.cf_atime, 3 * GAMMA - 2) / (SphP_j->Density * SphP_j->Density);
+              kernel.b2_j = SphP_j->BPred[0] * SphP_j->BPred[0] + SphP_j->BPred[1] * SphP_j->BPred[1] + SphP_j->BPred[2] * SphP_j->BPred[2];
+              double mm_j[3][3];
+              for(int k = 0; k < 3; k++)
+                {
+                  for(int l = 0; l < 3; l++)
+                    mm_j[k][l] = SphP_j->BPred[k] * SphP_j->BPred[l];
+                }
+             for(int k = 0; k < 3; k++)
+                mm_j[k][k] -= 0.5 * kernel.b2_j;
+#ifdef MAGNETIC_SIGNALVEL
+             kernel.alfven2_j = kernel.b2_j * MU0_INV / SphP_j->Density;
+             double vcsa2_j = kernel.sound_j * kernel.sound_j + kernel.alfven2_j;
+#endif
+#endif
+
               kernel.dvx        = SphP_i->VelPred[0] - SphP_j->VelPred[0];
               kernel.dvy        = SphP_i->VelPred[1] - SphP_j->VelPred[1];
               kernel.dvz        = SphP_i->VelPred[2] - SphP_j->VelPred[2];
               kernel.vdotr2     = kernel.dx * kernel.dvx + kernel.dy * kernel.dvy + kernel.dz * kernel.dvz;
               kernel.rho_ij_inv = 2.0 / (SphP_i->Density + SphP_j->Density);
-
+#ifdef MHD
+	      // only needed for dtEntropy update. We do it consistent here, different from Gadget3
+	      kernel.dBx = SphP_i->BPred[0] - SphP_j->BPred[0];
+              kernel.dBy = SphP_i->BPred[0] - SphP_j->BPred[0];
+              kernel.dBz = SphP_i->BPred[0] - SphP_j->BPred[0];
+#endif
               if(All.ComovingIntegrationOn)
                 kernel.vdotr2 += All.cf_atime2_hubble_a * r2;
 
@@ -892,8 +937,69 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 
               kernel.dwk_ij = 0.5 * (kernel.dwk_i + kernel.dwk_j);
 
-              kernel.vsig = kernel.sound_i + kernel.sound_j;
+#ifdef MHD
+              kernel.mj_r = P_j->Mass / kernel.r;
+              double mf_windfac = 1;
+              kernel.mf_Ind = mf_windfac * mf_Ind * kernel.mj_r * kernel.dwk_i;
+	      kernel.mf_i = mf_windfac * mf_i * kernel.mj_r * kernel.dwk_i;
+	      kernel.mf_j = mf_windfac * mf_j * kernel.mj_r * kernel.dwk_j;
+#ifdef TIMEDEP_ART_MHD_DIFFUSION
+              double dissfac = kernel.mj_r * kernel.dwk_ij * kernel.rho_ij_inv * kernel.rho_ij_inv;
+              kernel.mf_dissInd = mf_windfac * mf_dissInd * dissfac;
 
+#endif
+#ifdef TIMEDEP_ART_MHD_DIFFUSION
+              kernel.mf_dissEnt = mf_windfac * mf_dissEnt * dissfac;
+#endif
+// Now comes the induction equation:
+              SphP_i->dBdt[0] += kernel.mf_Ind * 
+		      ((SphP_i->BPred[0] * kernel.dvy - SphP_i->BPred[1] * kernel.dvx) * kernel.dy + 
+		       (SphP_i->BPred[0] * kernel.dvz - SphP_i->BPred[2] * kernel.dvx) * kernel.dz);
+
+              SphP_i->dBdt[1] += kernel.mf_Ind * 
+		      ((SphP_i->BPred[1] * kernel.dvz - SphP_i->BPred[2] * kernel.dvy) * kernel.dz + 
+		       (SphP_i->BPred[1] * kernel.dvx - SphP_i->BPred[0] * kernel.dvy) * kernel.dx);
+              
+              SphP_i->dBdt[2] += kernel.mf_Ind * 
+		      ((SphP_i->BPred[2] * kernel.dvx - SphP_i->BPred[0] * kernel.dvz) * kernel.dx + 
+		       (SphP_i->BPred[2] * kernel.dvy - SphP_i->BPred[1] * kernel.dvz) * kernel.dy);
+
+// Now comes the physical magnetic acceleration term:
+              for(int k = 0; k < 3; k++){
+                SphP_i->magacc[k] +=
+                  (mm_i[k][0] * kernel.mf_i + mm_j[k][0] * kernel.mf_j) * kernel.dx +
+                  (mm_i[k][1] * kernel.mf_i + mm_j[k][1] * kernel.mf_j) * kernel.dy +
+                  (mm_i[k][2] * kernel.mf_i + mm_j[k][2] * kernel.mf_j) * kernel.dz; 
+	      }
+// Now comes the correction term, following Borve et al. (2001), see also Price (2012), eq. 129
+              for(int k = 0; k < 3; k++){
+		 SphP_i->magacc[k] += SphP_i->BPred[k] *
+                   ((SphP_i->BPred[0] * kernel.mf_i + SphP_j->BPred[0] * kernel.mf_j) * kernel.dx +
+                    (SphP_i->BPred[1] * kernel.mf_i + SphP_j->BPred[1] * kernel.mf_j) * kernel.dy +
+                    (SphP_i->BPred[2] * kernel.mf_i + SphP_j->BPred[2] * kernel.mf_j) * kernel.dz);
+	      }		  
+#endif
+
+              kernel.vsig = kernel.sound_i + kernel.sound_j;
+#ifdef MHD
+#ifdef MAGNETIC_SIGNALVEL
+             double Bpro2_j = (SphP_j->BPred[0] * kernel.dx + SphP_j->BPred[1] * kernel.dy + SphP_j->BPred[2] * kernel.dz) / kernel.r;
+
+              Bpro2_j *= Bpro2_j;
+              double  magneticspeed_j = sqrt(0.5 * (vcsa2_j + sqrt(DMAX((vcsa2_j * vcsa2_j -
+                                                                                4 * kernel.sound_j *
+                                                                                kernel.sound_j * Bpro2_j *
+                                                                                MU0_INV / SphP_j->Density),
+                                                                                        (double)0))));
+              double Bpro2_i = (SphP_i->BPred[0] * kernel.dx + SphP_i->BPred[1] * kernel.dy + SphP_i->BPred[2] * kernel.dz) / kernel.r;
+              Bpro2_i *= Bpro2_i;
+              double magneticspeed_i = sqrt(0.5 * (vcsa2_i + sqrt(DMAX((vcsa2_i * vcsa2_i -
+                                                                                4 * kernel.sound_i *
+                                                                                kernel.sound_i * Bpro2_i *
+                                                                                         MU0_INV / SphP_i->.Density), (double)0))));
+              kernel.vsig = magneticspeed_i + magneticspeed_j;
+#endif
+#endif
               if(kernel.vsig > MaxSignalVel)
                 MaxSignalVel = kernel.vsig;
 
@@ -902,10 +1008,14 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               if(kernel.vdotr2 < 0) /* ... artificial viscosity */
                 {
                   double mu_ij = fac_mu * kernel.vdotr2 / kernel.r;
-
+#ifdef MHD
+                  kernel.vsig -= 2 * mu_ij;
+#else
                   kernel.vsig -= 3 * mu_ij;
+#endif
 
-#if defined(NO_SHEAR_VISCOSITY_LIMITER) || defined(TIMEDEP_ART_VISC)
+//#if defined(NO_SHEAR_VISCOSITY_LIMITER) || defined(TIMEDEP_ART_VISC)
+#if defined(NO_SHEAR_VISCOSITY_LIMITER) 
                   double f_i         = 1.;
                   double f_j         = 1.;
 #else
@@ -923,7 +1033,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
                   double BulkVisc_ij = All.ArtBulkViscConst;
 #endif
 
-                  visc        = 0.25 * BulkVisc_ij * kernel.vsig * (-mu_ij) * kernel.rho_ij_inv * (f_i + f_j);
+                  visc = 0.25 * BulkVisc_ij * kernel.vsig * (-mu_ij) * kernel.rho_ij_inv * (f_i + f_j);
 #ifdef VISCOSITY_LIMITER_FOR_LARGE_TIMESTEPS
                   int timebin = std::max<int>(P_i->TimeBinHydro, P_j->TimeBinHydro);
 
@@ -966,6 +1076,34 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               daccy += (-hfc * kernel.dy);
               daccz += (-hfc * kernel.dz);
               dentr += (0.5 * (hfc_visc)*kernel.vdotr2);
+#ifdef TIMEDEP_ART_COND
+	      double vsigu_cond = sqrt(fabs(SphP_i->Pressure - SphP_j->Pressure) * kernel.rho_ij_inv);
+              double u_i = SphP_i->Pressure / SphP_i->Density;
+	      double u_j = SphP_j->Pressure / SphP_j->Density;
+              double c_factor = P_j->Mass * kernel.rho_ij_inv * kernel.dwk_ij;
+              double c_alpha = 0.5 * (SphP_i->Calpha + SphP_j->Calpha);
+	      
+	      //printf("This is c_alpha: %g\n", c_alpha);
+	      //printf("This is c_factor: %g\n", c_factor);
+	      //printf("This is vsig_cond: %g\n", vsigu_cond);
+              dentr += c_factor * c_alpha * vsigu_cond * (u_i - u_j) / GAMMA_MINUS1;	      
+#endif
+#ifdef MHD
+              double phiphi = sqrt(pow(SphP_i->magcorr[0], 2.) + pow(SphP_i->magcorr[1], 2.) + pow(SphP_i->magcorr[2], 2.));
+              double tmpb = sqrt(pow(SphP_i->magacc[0], 2.) + pow(SphP_i->magacc[1], 2.) + pow(SphP_i->magacc[2], 2.));
+
+              if(phiphi > DIVBFORCE * tmpb){
+                SphP_i->magcorr[0] *= DIVBFORCE * tmpb / phiphi;
+                SphP_i->magcorr[1] *= DIVBFORCE * tmpb / phiphi;
+                SphP_i->magcorr[2] *= DIVBFORCE * tmpb / phiphi;
+	      }
+	  
+              daccx += (SphP_i->magacc[0] - SphP_i->magcorr[0]);
+              daccy += (SphP_i->magacc[0] - SphP_i->magcorr[0]);
+              daccz += (SphP_i->magacc[0] - SphP_i->magcorr[0]);
+	      //add artifical magnetic dissipation below
+	      dentr_mhd += 0;
+#endif
             }
         }
     }
