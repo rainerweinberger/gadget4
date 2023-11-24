@@ -43,6 +43,35 @@ struct sph_particle_data_hydrocore
 #ifdef TIMEDEP_ART_VISC
   MyFloat Alpha; /*!< time-dependend viscosity parameter */
 #endif
+#ifdef TIMEDEP_ART_COND
+  MyFloat Calpha;
+#ifdef SELFGRAVITY
+  MyFloat Climit;
+#endif
+#endif
+
+#ifdef MHD
+  MyFloat B[3];
+  MyFloat BPred[3];
+  MyFloat dBdt[3];
+  MyFloat RotB[3];
+  MyFloat DivB;
+  MyFloat CAlfven;      // Alfven velocity sqrt(Bpred^2 * MU0_INV)
+  MyFloat magacc[3];    // MHD force term 
+  MyFloat magcorr[3];   // Borve et al. (2004) stabilization term
+#ifdef TIMEDEP_MHD_DISSIPATION
+  MyFloat Balpha;
+  MyFloat DtBalpha;  
+#endif
+#ifdef CONSTRAINED_DIVB_CLEANING
+  MyFlaot CleanVel; //adaptive cleaning velocity
+  MyFloat Phi;
+  MyFloat PhiPred; 
+  MyFloat DtPhi;
+  MyFloat GradPsi[3];
+#endif  
+#endif 
+
 #ifdef PRESSURE_ENTROPY_SPH
   MyFloat EntropyToInvGammaPred;     /*!< current entropy function A to the power 1 / gamma */
   MyFloat DhsmlDerivedDensityFactor; /*!< additional correction factor needed for pressure formulation of SPH */
@@ -83,6 +112,21 @@ struct sph_particle_data : public sph_particle_data_hydrocore
   MyFloat DivVelOld; /* local velocity gradient from the previous time step */
   MyFloat decayVel;  /* decay velocity for the viscosity parameter */
 #endif
+
+#ifdef TIMEDEP_ART_COND
+  MyFloat GradA[3];
+#ifdef SELFGRAVITY
+  MyFloat Cgrav[3];
+#endif
+#endif
+
+#ifdef MHD
+  MyFloat B[3];
+  MyFloat BPred[3];
+  MyFloat dBdt[3];
+  MyFloat RotB[3];
+#endif
+
 
 #ifdef IMPROVED_VELOCITY_GRADIENTS
   struct
