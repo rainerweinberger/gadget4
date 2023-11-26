@@ -131,6 +131,7 @@ INITIAL_CONDITIONS_CONTAIN_ENTROPY
 #OUTPUT_COOLHEAT                              # output actual energy loss/gain in cooling/heating routine
 #OUTPUT_PRESSURE_SPH_DENSITY                  # output also density computed in the pressure-entropy forumulation
 #OUTPUT_VISCOSITY_PARAMETER                   # output current viscosity parameter in SPH particle output (only for time-dependent viscosity)
+#OUTPUT_CONDUCTIVITY_PARAMETER                output current onductivity parameter in SPH particle output (only for time-dependent conductivity)
 #OUTPUT_NON_SYNCHRONIZED_ALLOWED              # allow snapshot creation also at steps that are not fully synchronized
 #OUTPUT_VELOCITIES_IN_HALF_PRECISION          # special option to store velocities in reduced precision
 #OUTPUT_ACCELERATIONS_IN_HALF_PRECISION       # special option to store acclerations in reduced precision
