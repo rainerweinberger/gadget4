@@ -89,7 +89,7 @@ struct global_data_all_processes : public parameters
 #ifdef TIMEDEP_ART_VISC
   double AlphaMin; /*!< Minimum of allowed viscosity parameter */
 #endif
-#if defined(CONST_ART_COND) || defined(TIMEDEP_ART_COND)
+#ifdef TIMEDEP_ART_COND
   double ArtCondConstant;
 #endif
 #ifdef TIMEDEP_ART_COND

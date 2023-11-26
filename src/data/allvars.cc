@@ -148,7 +148,7 @@ void global_data_all_processes::register_parameters(void)
 #ifdef TIMEDEP_ART_VISC
   add_param("ViscosityAlphaMin", &AlphaMin, PARAM_DOUBLE, PARAM_CHANGEABLE);
 #endif
-#if defined(CONST_ART_COND) || defined(TIMEDEP_ART_COND)
+#ifdef TIMEDEP_ART_COND
   add_param("ArtCondConstant", &ArtCondConstant, PARAM_DOUBLE, PARAM_CHANGEABLE);
 #endif
 #ifdef TIMEDEP_ART_COND
