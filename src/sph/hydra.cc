@@ -822,7 +822,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 #ifdef MHD
   double mf_Ind = 1.0 / SphP_i->Density; 
   double mf_i = MU0_INV * pow(All.cf_atime, 3 * GAMMA - 2) / (SphP_i->Density * SphP_i->Density);
-#ifdef TIMEDEP_ART_MHD_DISSIPATION
+#ifdef TIMEDEP_MAGN_DISP
   double mf_dissInd = SphP_i->Density * All.cf_atime * All.cf_atime;
   double mf_dissEnt = 0.5 * MU0_INV * All.cf_atime * All.cf_atime;
 #endif
@@ -943,12 +943,12 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               kernel.mf_Ind = mf_windfac * mf_Ind * kernel.mj_r * kernel.dwk_i;
 	      kernel.mf_i = mf_windfac * mf_i * kernel.mj_r * kernel.dwk_i;
 	      kernel.mf_j = mf_windfac * mf_j * kernel.mj_r * kernel.dwk_j;
-#ifdef TIMEDEP_ART_MHD_DIFFUSION
+#ifdef TIMEDEP_MAGN_DISP
               double dissfac = kernel.mj_r * kernel.dwk_ij * kernel.rho_ij_inv * kernel.rho_ij_inv;
               kernel.mf_dissInd = mf_windfac * mf_dissInd * dissfac;
 
 #endif
-#ifdef TIMEDEP_ART_MHD_DIFFUSION
+#ifdef TIMEDEP_MAGN_DISP
               kernel.mf_dissEnt = mf_windfac * mf_dissEnt * dissfac;
 #endif
 // Now comes the induction equation:
