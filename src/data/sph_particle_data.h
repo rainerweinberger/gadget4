@@ -58,8 +58,8 @@ struct sph_particle_data_hydrocore
   MyFloat DivB;
   MyFloat CAlfven;      // Alfven velocity sqrt(Bpred^2 * MU0_INV)
   MyFloat magacc[3];    // MHD force term 
-  MyFloat magcorr[3];   // Borve et al. (2004) stabilization term
-#ifdef TIMEDEP_MAGN_DISSIPATION
+  MyFloat magcorr[3];   // Borve et al. (2001) stabilization term
+#ifdef TIMEDEP_MAGN_DISP
   MyFloat Balpha;
   MyFloat DtBalpha;  
 #endif

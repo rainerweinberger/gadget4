@@ -102,7 +102,7 @@ struct global_data_all_processes : public parameters
   double BiniY;
   double BiniZ;
 #endif
-#ifdef TIMEDEP_MAGN_DISSIPATION
+#ifdef TIMEDEP_MAGN_DISP
   double ArtMagDissipationConstant;
   double ArtMagDissipationMin;
 #endif
