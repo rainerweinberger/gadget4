@@ -94,6 +94,7 @@ SELFGRAVITY                                   # switch to enable self-gravity of
 #DIVBCLEANING                                 # enables the fancy constraint divergence cleaning of Tricco & Price (2016)
 #MU0_UNITY                                    # Sets the correct unit system for MU0=1. Only use this for MHD test cases
 #TIMEDEP_MAGN_DISP                            # enables the use of time dependent magnetic dissipation to stabalize MHD shocks
+#MAGNETIC_SIGNALVEL                           # adopts the magnetic signal velocity in the timestepping
 
 #--------------------------------------- Extra physics
 

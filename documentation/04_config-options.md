@@ -776,6 +776,15 @@ inactive in production runs.
 
 Turns on the time-dependent artifificial magnetic resistivity. Needed for improved results on MHD shocks. 
 
+-------
+
+**MAGNETIC_SIGNALVEL**
+
+If this switch is used, the magnetic signal velocity is adopted for the time stepping instead of the soundspeed.
+This is defined as the fastest alfvenic wave speed in classical MHD.
+
+-------
+
 
 Extra physics                                             {#physics}
 =============
@@ -1051,6 +1060,14 @@ requires `COOLING` to be active as well.
 With this option, one can request an output of the viscosity parameter
 for each SPH particle in the snapshot files. This option requires
 `TIMEDEP_ART_VISC` to be active as well.
+
+-------
+
+**OUTPUT_CONDUCTIVITY_PARAMETER**
+
+With this option, one can request an output of the conductivity parameter
+for each SPH particle in the snapshot files. This option requires
+`TIMEDEP_ART_COND` to be active as well.
 
 -------
 
