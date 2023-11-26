@@ -154,7 +154,7 @@ void global_data_all_processes::register_parameters(void)
 #ifdef TIMEDEP_ART_COND
   add_param("ArtCondMin", &ArtCondMin, PARAM_DOUBLE, PARAM_CHANGEABLE);
 #endif
-#ifdef TIMEDEP_MHD_DISSIPATION
+#ifdef TIMEDEP_MAGN_DISSIPATION
   add_param("ArtMagDissipationConstant", &ArtMagDissipationConstant, PARAM_DOUBLE, PARAM_CHANGEABLE);
   add_param("ArtMagDissipationMin", &ArtMagDissipationMin, PARAM_DOUBLE, PARAM_CHANGEABLE);
 #endif 
