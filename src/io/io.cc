@@ -1470,9 +1470,6 @@ void IO_Def::read_file(const char *fname, int filenr, int readTask, int lastTask
 
   for(int blocknr = 0; blocknr < N_IO_Fields; blocknr++)
     {
-#ifdef MY_SKIP
-      if (blocknr > 4 ) {IO_Fields[blocknr].read_flag == SKIP_ON_READ;}
-#endif
       if((IO_Fields[blocknr].read_flag != SKIP_ON_READ &&
           !(file_format == FILEFORMAT_LEGACY1 && All.RestartFlag == RST_BEGIN && type_of_file == FILE_IS_SNAPSHOT &&
             blocknr > 4) /* this second conditions allows short legacy ICs to be read in */
