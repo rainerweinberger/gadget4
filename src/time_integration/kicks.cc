@@ -558,7 +558,7 @@ void sim::hydro_force(int step_indicator)
      if(All.ComovingIntegrationOn)
        dt_mag = Driftfac.get_magkick_factor(tstart, tend);
      else
-       dt_mag = (tend - tstart) * All.Timebase_interval; 
+       dt_mag = dt_entr; 
      
      Sp.SphP[target].B[0] += Sp.SphP[target].dBdt[0] * dt_mag;
      Sp.SphP[target].B[1] += Sp.SphP[target].dBdt[1] * dt_mag;
@@ -580,7 +580,7 @@ void sim::hydro_force(int step_indicator)
 #ifdef MHD
          Sp.SphP[target].BPred[0] = Sp.SphP[target].B[0];
          Sp.SphP[target].BPred[1] = Sp.SphP[target].B[1];
-          Sp.SphP[target].BPred[2] = Sp.SphP[target].B[2]; 
+         Sp.SphP[target].BPred[2] = Sp.SphP[target].B[2]; 
 #endif
           /* note: if there is no gravity, we should instead set VelPred = Vel (if this is not done anymore in the gravity
            * routine)
