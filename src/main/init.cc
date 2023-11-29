@@ -55,9 +55,9 @@ using namespace std;
 void sim::init(int RestartSnapNum)
 {
 
-#ifdef MHD
-   double a2_fac, gauss2gadget = 1.0;
-#endif	
+//#ifdef MHD
+//   double a2_fac, gauss2gadget = 1.0;
+//#endif	
 
 #ifdef NGENIC
   if(All.RestartFlag == RST_CREATEICS || All.RestartFlag == RST_BEGIN)
@@ -283,25 +283,25 @@ void sim::init(int RestartSnapNum)
     {
       All.Timebase_interval = (log(All.TimeMax) - log(All.TimeBegin)) / TIMEBASE;
       All.Ti_Current        = 0;
-#ifdef MHD
-#ifndef MU0_UNITY
-      gauss2gadget *=
-        sqrt(All.UnitTime_in_s * All.UnitTime_in_s * All.UnitLength_in_cm / All.UnitMass_in_g /
-             (All.HubbleParam * All.HubbleParam));
-#endif
-      a2_fac = (All.Time * All.Time);
-#endif
+//#ifdef MHD
+//#ifndef MU0_UNITY
+//      gauss2gadget *=
+//        sqrt(All.UnitTime_in_s * All.UnitTime_in_s * All.UnitLength_in_cm / All.UnitMass_in_g /
+//             (All.HubbleParam * All.HubbleParam));
+//#endif
+//      a2_fac = (All.Time * All.Time);
+//#endif
     }
   else
     {
       All.Timebase_interval = (All.TimeMax - All.TimeBegin) / TIMEBASE;
       All.Ti_Current        = 0;
-#ifdef MHD
-#ifndef MU0_UNITY
-      gauss2gadget *= sqrt(All.UnitTime_in_s * All.UnitTime_in_s * All.UnitLength_in_cm / All.UnitMass_in_g);
-#endif
-      a2_fac = 1;
-#endif
+//#ifdef MHD
+//#ifndef MU0_UNITY
+//      gauss2gadget *= sqrt(All.UnitTime_in_s * All.UnitTime_in_s * All.UnitLength_in_cm / All.UnitMass_in_g);
+//#endif
+//      a2_fac = 1;
+//#endif
     }
 
   All.set_cosmo_factors_for_current_time();
@@ -411,7 +411,7 @@ void sim::init(int RestartSnapNum)
 #endif /*BINISET*/
      for(int j = 0; j < 3; j++)
        {
-          Sp.SphP[i].BPred[j] *= a2_fac * gauss2gadget;
+          //Sp.SphP[i].BPred[j] *= a2_fac * gauss2gadget;
           Sp.SphP[i].B[j] = Sp.SphP[i].BPred[j];
         }
 #ifdef TIMEDEP_MAGN_DISP

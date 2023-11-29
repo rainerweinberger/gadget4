@@ -156,6 +156,17 @@ void snap_io::init_basic(simparticles *Sp_ptr)
              0, 0, 0, 0, 0, 0, 0);
 #endif
 
+#ifdef MHD
+  //For the moment this is fine but we need to do proper units eventually...
+  init_field("BFLD", "MagneticField", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, READ_IF_PRESENT, 3, A_SPHP, &Sp->SphP[0].BPred, 0,
+             GAS_ONLY, /* particle entropy */
+             0, 0, 0, 0, 0, 0, 0);
+
+  init_field("DIVB", "DivergenceOfMagneticField", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, READ_IF_PRESENT, 1, A_SPHP, &Sp->SphP[0].DivB, 0,
+             GAS_ONLY, /* particle entropy */
+             0, 0, 0, 0, 0, 0, 0);
+#endif
+
 #ifdef COOLING
   init_field("NE  ", "ElectronAbundance", MEM_MY_FLOAT, FILE_MY_IO_FLOAT, READ_IF_PRESENT, 1, A_SPHP, &Sp->SphP[0].Ne, 0,
              GAS_ONLY, /* electron abundance */
