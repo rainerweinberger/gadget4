@@ -785,6 +785,21 @@ This is defined as the fastest alfvenic wave speed in classical MHD.
 
 -------
 
+**DIVBFORCE**
+
+Switches on the correction term on the momentum equation. While this violates momentum conservation it stabalizes against the 
+so called MHD-tensile instability. If not set the switch will default to DIVBFORCE=1. 
+
+-------
+
+**CONSTRAINED_DIVB_CLEANING**
+
+Constrained divergence cleaning following Tricco, Price and Bate (2016) as implemented by Steinwandel and Price into 
+the Gadget3 code and ported to Gadget4. This is an energy cosnerving variant of the Dedner et al. (2002) divergence 
+cleaning scheme and reduces divergence errors by 2-3 orders of magnitude. It is recommended to turn this on.
+
+-------
+
 
 Extra physics                                             {#physics}
 =============

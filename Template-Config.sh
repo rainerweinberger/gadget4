@@ -95,6 +95,8 @@ SELFGRAVITY                                   # switch to enable self-gravity of
 #MU0_UNITY                                    # Sets the correct unit system for MU0=1. Only use this for MHD test cases
 #TIMEDEP_MAGN_DISP                            # enables the use of time dependent magnetic dissipation to stabalize MHD shocks
 #MAGNETIC_SIGNALVEL                           # adopts the magnetic signal velocity in the timestepping
+#DIVBFORCE=1                                  # MHD correction term following Borve et al. (2004)
+#CONSTRAINED_DIVB_CLEANING                    # Constraiend divB cleaning of Tricco, Price and Bate (2016), see Steinwandel and Price (in prep) for details when it comes out
 
 #--------------------------------------- Extra physics
 
