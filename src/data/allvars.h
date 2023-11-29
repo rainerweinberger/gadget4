@@ -24,11 +24,16 @@
 #include "../io/parameters.h"
 
 #ifdef MHD
+
+#ifndef MAGNETIC_SIGNALVEL
 #define MAGNETIC_SIGNALVEL
+#endif
+
 #ifndef DIVBFORCE 
 #define DIVBFORCE 1
 #endif
-#endif
+
+#endif //MHD
 
 /** Data which is the SAME for all tasks (mostly code parameters read
  * from the parameter file).  Holding this data in a structure is
