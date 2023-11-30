@@ -904,8 +904,8 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 #ifdef MHD
 	      // only needed for dtEntropy update. We do it consistent here, different from Gadget3
 	      kernel.dBx = SphP_i->BPred[0] - SphP_j->BPred[0];
-              kernel.dBy = SphP_i->BPred[0] - SphP_j->BPred[0];
-              kernel.dBz = SphP_i->BPred[0] - SphP_j->BPred[0];
+              kernel.dBy = SphP_i->BPred[1] - SphP_j->BPred[1];
+              kernel.dBz = SphP_i->BPred[2] - SphP_j->BPred[2];
 #endif
               if(All.ComovingIntegrationOn)
                 kernel.vdotr2 += All.cf_atime2_hubble_a * r2;
