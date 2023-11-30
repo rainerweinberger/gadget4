@@ -1102,8 +1102,8 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 	      }
 	  
               daccx += (SphP_i->magacc[0] - SphP_i->magcorr[0]);
-              daccy += (SphP_i->magacc[0] - SphP_i->magcorr[0]);
-              daccz += (SphP_i->magacc[0] - SphP_i->magcorr[0]);
+              daccy += (SphP_i->magacc[1] - SphP_i->magcorr[1]);
+              daccz += (SphP_i->magacc[2] - SphP_i->magcorr[2]);
 	      //add artifical magnetic dissipation below
 	      dentr += 0;
 #endif
