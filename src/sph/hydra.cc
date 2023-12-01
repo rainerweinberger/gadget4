@@ -902,7 +902,6 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               kernel.vdotr2     = kernel.dx * kernel.dvx + kernel.dy * kernel.dvy + kernel.dz * kernel.dvz;
               kernel.rho_ij_inv = 2.0 / (SphP_i->Density + SphP_j->Density);
 #ifdef MHD
-	      // only needed for dtEntropy update. We do it consistent here, different from Gadget3
 	      kernel.dBx = SphP_i->BPred[0] - SphP_j->BPred[0];
               kernel.dBy = SphP_i->BPred[1] - SphP_j->BPred[1];
               kernel.dBz = SphP_i->BPred[2] - SphP_j->BPred[2];
@@ -973,7 +972,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 	      }
 // Now comes the correction term, following Borve et al. (2001), see also Price (2012), eq. 129
               for(int k = 0; k < 3; k++){
-		 SphP_i->magacc[k] += SphP_i->BPred[k] *
+		 SphP_i->magcorr[k] += SphP_i->BPred[k] *
                    ((SphP_i->BPred[0] * kernel.mf_i + SphP_j->BPred[0] * kernel.mf_j) * kernel.dx +
                     (SphP_i->BPred[1] * kernel.mf_i + SphP_j->BPred[1] * kernel.mf_j) * kernel.dy +
                     (SphP_i->BPred[2] * kernel.mf_i + SphP_j->BPred[2] * kernel.mf_j) * kernel.dz);
@@ -1092,13 +1091,13 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               dentr += c_factor * c_alpha * vsigu_cond * (u_i - u_j) / GAMMA_MINUS1;	      
 #endif
 #ifdef MHD
-              double phiphi = sqrt(pow(SphP_i->magcorr[0], 2.) + pow(SphP_i->magcorr[1], 2.) + pow(SphP_i->magcorr[2], 2.));
-              double tmpb = sqrt(pow(SphP_i->magacc[0], 2.) + pow(SphP_i->magacc[1], 2.) + pow(SphP_i->magacc[2], 2.));
+              double magcorr2 = sqrt(pow(SphP_i->magcorr[0], 2.) + pow(SphP_i->magcorr[1], 2.) + pow(SphP_i->magcorr[2], 2.));
+              double magacc2 = sqrt(pow(SphP_i->magacc[0], 2.) + pow(SphP_i->magacc[1], 2.) + pow(SphP_i->magacc[2], 2.));
 
-              if(phiphi > DIVBFORCE * tmpb){
-                SphP_i->magcorr[0] *= DIVBFORCE * tmpb / phiphi;
-                SphP_i->magcorr[1] *= DIVBFORCE * tmpb / phiphi;
-                SphP_i->magcorr[2] *= DIVBFORCE * tmpb / phiphi;
+              if(magcorr2 > DIVBFORCE * magacc2){
+                SphP_i->magcorr[0] *= DIVBFORCE * magacc2 / magcorr2;
+                SphP_i->magcorr[1] *= DIVBFORCE * magacc2 / magcorr2;
+                SphP_i->magcorr[2] *= DIVBFORCE * magacc2 / magcorr2;
 	      }
 	  
               daccx += (SphP_i->magacc[0] - SphP_i->magcorr[0]);
