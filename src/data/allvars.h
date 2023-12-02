@@ -25,9 +25,9 @@
 
 #ifdef MHD
 
-//#ifndef MAGNETIC_SIGNALVEL
-//#define MAGNETIC_SIGNALVEL
-//#endif
+#ifndef MAGNETIC_SIGNALVEL
+#define MAGNETIC_SIGNALVEL
+#endif
 
 #ifndef DIVBFORCE 
 #define DIVBFORCE 1

@@ -936,49 +936,6 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 
               kernel.dwk_ij = 0.5 * (kernel.dwk_i + kernel.dwk_j);
 
-#ifdef MHD
-              kernel.mj_r = P_j->Mass / kernel.r;
-              double mf_windfac = 1;
-              kernel.mf_Ind = mf_windfac * mf_Ind * kernel.mj_r * kernel.dwk_i;
-	      kernel.mf_i = mf_windfac * mf_i * kernel.mj_r * kernel.dwk_i;
-	      kernel.mf_j = mf_windfac * mf_j * kernel.mj_r * kernel.dwk_j;
-#ifdef TIMEDEP_MAGN_DISP
-              double dissfac = kernel.mj_r * kernel.dwk_ij * kernel.rho_ij_inv * kernel.rho_ij_inv;
-              kernel.mf_dissInd = mf_windfac * mf_dissInd * dissfac;
-
-#endif
-#ifdef TIMEDEP_MAGN_DISP
-              kernel.mf_dissEnt = mf_windfac * mf_dissEnt * dissfac;
-#endif
-// Now comes the induction equation:
-              SphP_i->dBdt[0] += kernel.mf_Ind * 
-		      ((SphP_i->BPred[0] * kernel.dvy - SphP_i->BPred[1] * kernel.dvx) * kernel.dy + 
-		       (SphP_i->BPred[0] * kernel.dvz - SphP_i->BPred[2] * kernel.dvx) * kernel.dz);
-
-              SphP_i->dBdt[1] += kernel.mf_Ind * 
-		      ((SphP_i->BPred[1] * kernel.dvz - SphP_i->BPred[2] * kernel.dvy) * kernel.dz + 
-		       (SphP_i->BPred[1] * kernel.dvx - SphP_i->BPred[0] * kernel.dvy) * kernel.dx);
-              
-              SphP_i->dBdt[2] += kernel.mf_Ind * 
-		      ((SphP_i->BPred[2] * kernel.dvx - SphP_i->BPred[0] * kernel.dvz) * kernel.dx + 
-		       (SphP_i->BPred[2] * kernel.dvy - SphP_i->BPred[1] * kernel.dvz) * kernel.dy);
-
-// Now comes the physical magnetic acceleration term:
-              for(int k = 0; k < 3; k++){
-                SphP_i->magacc[k] +=
-                  (mm_i[k][0] * kernel.mf_i + mm_j[k][0] * kernel.mf_j) * kernel.dx +
-                  (mm_i[k][1] * kernel.mf_i + mm_j[k][1] * kernel.mf_j) * kernel.dy +
-                  (mm_i[k][2] * kernel.mf_i + mm_j[k][2] * kernel.mf_j) * kernel.dz; 
-	      }
-// Now comes the correction term, following Borve et al. (2001), see also Price (2012), eq. 129
-              for(int k = 0; k < 3; k++){
-		 SphP_i->magcorr[k] += SphP_i->BPred[k] *
-                   ((SphP_i->BPred[0] * kernel.mf_i + SphP_j->BPred[0] * kernel.mf_j) * kernel.dx +
-                    (SphP_i->BPred[1] * kernel.mf_i + SphP_j->BPred[1] * kernel.mf_j) * kernel.dy +
-                    (SphP_i->BPred[2] * kernel.mf_i + SphP_j->BPred[2] * kernel.mf_j) * kernel.dz);
-	      }		  
-#endif
-
               kernel.vsig = kernel.sound_i + kernel.sound_j;
 #ifdef MHD
 #ifdef MAGNETIC_SIGNALVEL
@@ -1016,8 +973,8 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
                   kernel.vsig -= 3 * mu_ij;
 #endif
 
-//#if defined(NO_SHEAR_VISCOSITY_LIMITER) || defined(TIMEDEP_ART_VISC)
-#if defined(NO_SHEAR_VISCOSITY_LIMITER) 
+#if defined(NO_SHEAR_VISCOSITY_LIMITER) || defined(TIMEDEP_ART_VISC)
+//#if defined(NO_SHEAR_VISCOSITY_LIMITER) 
                   double f_i         = 1.;
                   double f_j         = 1.;
 #else
@@ -1090,6 +1047,50 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 	      //printf("This is vsig_cond: %g\n", vsigu_cond);
               dentr += c_factor * c_alpha * vsigu_cond * (u_i - u_j) / GAMMA_MINUS1;	      
 #endif
+
+#ifdef MHD
+              kernel.mj_r = P_j->Mass / kernel.r;
+              double mf_windfac = 1;
+              kernel.mf_Ind = mf_windfac * mf_Ind * kernel.mj_r * kernel.dwk_i;
+              kernel.mf_i = mf_windfac * mf_i * kernel.mj_r * kernel.dwk_i;
+              kernel.mf_j = mf_windfac * mf_j * kernel.mj_r * kernel.dwk_j;
+#ifdef TIMEDEP_MAGN_DISP
+              double dissfac = kernel.mj_r * kernel.dwk_ij * kernel.rho_ij_inv * kernel.rho_ij_inv;
+              kernel.mf_dissInd = mf_windfac * mf_dissInd * dissfac;
+
+#endif
+#ifdef TIMEDEP_MAGN_DISP
+              kernel.mf_dissEnt = mf_windfac * mf_dissEnt * dissfac;
+#endif
+// Now comes the induction equation:
+              SphP_i->dBdt[0] += kernel.mf_Ind *
+                      ((SphP_i->BPred[0] * kernel.dvy - SphP_i->BPred[1] * kernel.dvx) * kernel.dy +
+                       (SphP_i->BPred[0] * kernel.dvz - SphP_i->BPred[2] * kernel.dvx) * kernel.dz);
+
+              SphP_i->dBdt[1] += kernel.mf_Ind *
+                      ((SphP_i->BPred[1] * kernel.dvz - SphP_i->BPred[2] * kernel.dvy) * kernel.dz +
+                       (SphP_i->BPred[1] * kernel.dvx - SphP_i->BPred[0] * kernel.dvy) * kernel.dx);
+
+              SphP_i->dBdt[2] += kernel.mf_Ind *
+                      ((SphP_i->BPred[2] * kernel.dvx - SphP_i->BPred[0] * kernel.dvz) * kernel.dx +
+                       (SphP_i->BPred[2] * kernel.dvy - SphP_i->BPred[1] * kernel.dvz) * kernel.dy);
+
+// Now comes the physical magnetic acceleration term:
+              for(int k = 0; k < 3; k++){
+                SphP_i->magacc[k] +=
+                  (mm_i[k][0] * kernel.mf_i + mm_j[k][0] * kernel.mf_j) * kernel.dx +
+                  (mm_i[k][1] * kernel.mf_i + mm_j[k][1] * kernel.mf_j) * kernel.dy +
+                  (mm_i[k][2] * kernel.mf_i + mm_j[k][2] * kernel.mf_j) * kernel.dz;
+              }
+// Now comes the correction term, following Borve et al. (2001), see also Price (2012), eq. 129
+              for(int k = 0; k < 3; k++){
+                 SphP_i->magcorr[k] += SphP_i->BPred[k] *
+                   ((SphP_i->BPred[0] * kernel.mf_i + SphP_j->BPred[0] * kernel.mf_j) * kernel.dx +
+                    (SphP_i->BPred[1] * kernel.mf_i + SphP_j->BPred[1] * kernel.mf_j) * kernel.dy +
+                    (SphP_i->BPred[2] * kernel.mf_i + SphP_j->BPred[2] * kernel.mf_j) * kernel.dz);
+              }
+#endif
+
 #ifdef MHD
               double magcorr2 = sqrt(pow(SphP_i->magcorr[0], 2.) + pow(SphP_i->magcorr[1], 2.) + pow(SphP_i->magcorr[2], 2.));
               double magacc2 = sqrt(pow(SphP_i->magacc[0], 2.) + pow(SphP_i->magacc[1], 2.) + pow(SphP_i->magacc[2], 2.));
@@ -1098,7 +1099,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
                 SphP_i->magcorr[0] *= DIVBFORCE * magacc2 / magcorr2;
                 SphP_i->magcorr[1] *= DIVBFORCE * magacc2 / magcorr2;
                 SphP_i->magcorr[2] *= DIVBFORCE * magacc2 / magcorr2;
-	      }
+              }
 	  
               daccx += (SphP_i->magacc[0] - SphP_i->magcorr[0]);
               daccy += (SphP_i->magacc[1] - SphP_i->magcorr[1]);
@@ -1131,4 +1132,11 @@ inline void sph::clear_hydro_result(sph_particle_data *SphP)
 
   SphP->DtEntropy    = 0;
   SphP->MaxSignalVel = 0;
+#ifdef MHD
+  for(int k = 0; k < 3; k++){
+    SphP->dBdt[k] = 0;
+    SphP->magacc[k] = 0;
+    SphP->magcorr[k] = 0;
+  }
+#endif
 }
