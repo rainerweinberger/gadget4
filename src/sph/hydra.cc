@@ -901,11 +901,11 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               kernel.dvz        = SphP_i->VelPred[2] - SphP_j->VelPred[2];
               kernel.vdotr2     = kernel.dx * kernel.dvx + kernel.dy * kernel.dvy + kernel.dz * kernel.dvz;
               kernel.rho_ij_inv = 2.0 / (SphP_i->Density + SphP_j->Density);
-#ifdef MHD
-	      kernel.dBx = SphP_i->BPred[0] - SphP_j->BPred[0];
-              kernel.dBy = SphP_i->BPred[1] - SphP_j->BPred[1];
-              kernel.dBz = SphP_i->BPred[2] - SphP_j->BPred[2];
-#endif
+//#ifdef MHD
+//	      kernel.dBx = SphP_i->BPred[0] - SphP_j->BPred[0];
+//              kernel.dBy = SphP_i->BPred[1] - SphP_j->BPred[1];
+//              kernel.dBz = SphP_i->BPred[2] - SphP_j->BPred[2];
+//#endif
               if(All.ComovingIntegrationOn)
                 kernel.vdotr2 += All.cf_atime2_hubble_a * r2;
 
@@ -951,7 +951,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               
 	      double Bpro2_i = (SphP_i->BPred[0] * kernel.dx + SphP_i->BPred[1] * kernel.dy + SphP_i->BPred[2] * kernel.dz) / kernel.r;
               Bpro2_i *= Bpro2_i;
-	      double Bfac_i = (vcsa2_i * vcsa2_i - 4 * kernel.sound_i * kernel.sound_i * Bpro2_j * MU0_INV / SphP_i->Density);
+	      double Bfac_i = (vcsa2_i * vcsa2_i - 4 * kernel.sound_i * kernel.sound_i * Bpro2_i * MU0_INV / SphP_i->Density);
               if (Bfac_i < 0.0)
                 Bfac_i = 0.0;
 
@@ -1009,7 +1009,7 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
               double hfc_visc = P_j->Mass * visc * kernel.dwk_ij / kernel.r;
 
 #ifndef PRESSURE_ENTROPY_SPH
-              /* Formulation derived from the Lagrangian */
+              /* Formulation derived from the Lagrangian, grad h correction term */
               kernel.dwk_i *= SphP_i->DhsmlDensityFactor;
               kernel.dwk_j *= SphP_j->DhsmlDensityFactor;
 
@@ -1050,17 +1050,19 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 
 #ifdef MHD
               kernel.mj_r = P_j->Mass / kernel.r;
-              double mf_windfac = 1;
-              kernel.mf_Ind = mf_windfac * mf_Ind * kernel.mj_r * kernel.dwk_i;
-              kernel.mf_i = mf_windfac * mf_i * kernel.mj_r * kernel.dwk_i;
-              kernel.mf_j = mf_windfac * mf_j * kernel.mj_r * kernel.dwk_j;
+	      /* Since kernel.dwk_i carrys the grad h corection term kernel.mf_Ind carrys the correction term as well */
+              kernel.mf_Ind = mf_Ind * kernel.mj_r * kernel.dwk_i;
+	      /* In density-entropy SPH, kernel.dwk_i and kernel.dwk_j carry the grad h correction term below */
+	      /* Thus kernel.mf_i and kernel.mf_j carry the grad h correction term */
+              kernel.mf_i = mf_i * kernel.mj_r * kernel.dwk_i;
+              kernel.mf_j = mf_j * kernel.mj_r * kernel.dwk_j;
 #ifdef TIMEDEP_MAGN_DISP
               double dissfac = kernel.mj_r * kernel.dwk_ij * kernel.rho_ij_inv * kernel.rho_ij_inv;
-              kernel.mf_dissInd = mf_windfac * mf_dissInd * dissfac;
+              kernel.mf_dissInd = mf_dissInd * dissfac;
 
 #endif
 #ifdef TIMEDEP_MAGN_DISP
-              kernel.mf_dissEnt = mf_windfac * mf_dissEnt * dissfac;
+              kernel.mf_dissEnt = mf_dissEnt * dissfac;
 #endif
 // Now comes the induction equation:
               SphP_i->dBdt[0] += kernel.mf_Ind *
@@ -1094,6 +1096,9 @@ void sph::hydro_evaluate_kernel(pinfo &pdat)
 #ifdef MHD
               double magcorr2 = sqrt(pow(SphP_i->magcorr[0], 2.) + pow(SphP_i->magcorr[1], 2.) + pow(SphP_i->magcorr[2], 2.));
               double magacc2 = sqrt(pow(SphP_i->magacc[0], 2.) + pow(SphP_i->magacc[1], 2.) + pow(SphP_i->magacc[2], 2.));
+              
+	      //printf("This is magacc2: %g\n", magacc2);
+              //printf("This is magcorr2: %g\n", magcorr2);
 
               if(magcorr2 > DIVBFORCE * magacc2){
                 SphP_i->magcorr[0] *= DIVBFORCE * magacc2 / magcorr2;

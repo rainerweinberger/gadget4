@@ -128,6 +128,7 @@
 #define SEC_PER_YEAR 3.15576e7
 
 #ifdef MHD
+
 #ifdef MU0_UNITY
 #define MU0 1.0
 #define MU0_INV 1.0
@@ -135,6 +136,7 @@
 #define MU0  12.566370614  /* 4pi */
 #define MU0_INV 0.079577472  /* 1/4pi */
 #endif
+
 #endif
 
 #ifndef FOF_PRIMARY_LINK_TYPES

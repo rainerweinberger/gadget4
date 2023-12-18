@@ -1119,9 +1119,9 @@ void sph::density_evaluate_kernel(pinfo &pdat)
                                          targetSphP->EntropyPred * pow(targetSphP->Density, GAMMA_MINUS1)));
 #endif
 #ifdef MHD 
-         targetSphP->RotB[0] += kernel.mj_dwk_r * (kernel.dpos[2] * kernel.dB[1] - kernel.dpos[1] * kernel.dB[2]);
-         targetSphP->RotB[1] += kernel.mj_dwk_r * (kernel.dpos[0] * kernel.dB[2] - kernel.dpos[2] * kernel.dB[0]);
-         targetSphP->RotB[2] += kernel.mj_dwk_r * (kernel.dpos[1] * kernel.dB[0] - kernel.dpos[0] * kernel.dB[1]);
+          targetSphP->RotB[0] += kernel.mj_dwk_r * (kernel.dpos[2] * kernel.dB[1] - kernel.dpos[1] * kernel.dB[2]);
+          targetSphP->RotB[1] += kernel.mj_dwk_r * (kernel.dpos[0] * kernel.dB[2] - kernel.dpos[2] * kernel.dB[0]);
+          targetSphP->RotB[2] += kernel.mj_dwk_r * (kernel.dpos[1] * kernel.dB[0] - kernel.dpos[0] * kernel.dB[1]);
 #endif
         }
     }
