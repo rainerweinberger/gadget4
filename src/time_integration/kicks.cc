@@ -578,9 +578,9 @@ void sim::hydro_force(int step_indicator)
           Sp.SphP[target].VelPred[2] += (Sp.SphP[target].HydroAccel[2] - Old[i].HydroAccel[2]) * dt_hydrokick;
 
 #ifdef MHD
-         Sp.SphP[target].BPred[0] = Sp.SphP[target].B[0];
-         Sp.SphP[target].BPred[1] = Sp.SphP[target].B[1];
-         Sp.SphP[target].BPred[2] = Sp.SphP[target].B[2]; 
+          Sp.SphP[target].BPred[0] = Sp.SphP[target].B[0];
+          Sp.SphP[target].BPred[1] = Sp.SphP[target].B[1];
+          Sp.SphP[target].BPred[2] = Sp.SphP[target].B[2]; 
 #endif
           /* note: if there is no gravity, we should instead set VelPred = Vel (if this is not done anymore in the gravity
            * routine)

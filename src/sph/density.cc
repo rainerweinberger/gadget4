@@ -1157,4 +1157,18 @@ inline void sph::clear_density_result(sph_particle_data *SphP)
 #ifdef TIMEDEP_ART_VISC
   SphP->decayVel = 0;
 #endif
+
+#ifdef TIMEDEP_ART_COND
+   for(int k = 0; k < 3; k++){
+    SphP->GradA[k] = 0;
+  }
+#endif
+
+#ifdef MHD
+  SphP->DivB = 0;
+  for(int k = 0; k < 3; k++){
+    //SphP->BPred[k] = 0;
+    SphP->RotB[k] = 0;
+  }
+#endif
 }

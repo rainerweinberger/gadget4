@@ -165,10 +165,10 @@ void sph_particle_data::set_viscosity_coefficient(double dt)
       return;
     }
 
-  double devayVel_p = decayVel * All.cf_afac3;  //has the same a factor as sound speed
+  double decayVel_p = decayVel * All.cf_afac3;  //has the same a factor as sound speed
 
   //double DecayTime = 10. * hsml_p / devayVel_p; Price et al. (2018), eq. 48
-  double DecayTime = 20. * hsml_p / devayVel_p; //Cullen & Dehnen for AlphaMin=0
+  double DecayTime = 20. * hsml_p / decayVel_p; //Cullen & Dehnen for AlphaMin=0
   //Alpha            = limiter * (alpha_tar + (Alpha - alpha_tar) * exp(-dt / DecayTime));
   Alpha            = (alpha_tar + (Alpha - alpha_tar) * exp(-dt / DecayTime));
   if(Alpha < All.AlphaMin){
