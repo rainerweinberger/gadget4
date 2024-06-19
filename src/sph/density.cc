@@ -1159,6 +1159,7 @@ inline void sph::clear_density_result(sph_particle_data *SphP)
 #endif
 
 #ifdef TIMEDEP_ART_COND
+   SphP->Calpha = 0;
    for(int k = 0; k < 3; k++){
     SphP->GradA[k] = 0;
   }
