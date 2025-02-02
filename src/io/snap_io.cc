@@ -455,8 +455,13 @@ void snap_io::snap_init_domain_mapping(void)
   double posmin[3], posmax[3];
   for(int k = 0; k < 3; k++)
     {
+#ifdef EXTERNALGRAVITY
+      posmin[k] = 0;  // make sure that origin is included in this case
+      posmax[k] = 0;
+#else
       posmin[k] = MAX_REAL_NUMBER;
       posmax[k] = -MAX_REAL_NUMBER;
+#endif
     }
 
   for(int i = 0; i < Sp->NumPart; i++)
