@@ -567,13 +567,6 @@ void sph::density(int *list, int ntarget)
               SphP[target].NumNgb = NORM_COEFF * hfac * SphP[target].Density / Tp->P[target].getMass();
               if(SphP[target].NumNgb < (desnumngb - desnumngbdev) || (SphP[target].NumNgb > (desnumngb + desnumngbdev)))
                 {
-                  if(Left[target] > 0 && Right[target] > 0)
-                    if((Right[target] - Left[target]) < 1.0e-3 * Left[target])
-                      {
-                        /* this one should be ok */
-                        continue;
-                      }
-
                   /* need to redo this particle */
                   targetList[npleft++] = target;
 
