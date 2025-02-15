@@ -234,7 +234,7 @@ int lightcone::lightcone_test_for_particle_addition(particle_data *P, integertim
 
             for(int q = 0; q < 3; q++)
               {
-                diffBminusA[q] = P->Vel[q] * dt_drift * Sp->FacIntToCoord;
+                diffBminusA[q] = P->Vel[q] * dt_drift;
                 PosB[q]        = PosA[q] + diffBminusA[q];
               }
 
