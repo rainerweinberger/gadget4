@@ -1,0 +1,10 @@
+GSL_INCL   = -I$(GSL_INC)
+GSL_LIBS   = -L/opt/ohpc/pub/libs/gnu9/gsl/2.7/lib
+FFTW_INCL  = -I/opt/ohpc/pub/libs/gnu9/openmpi4/fftw/3.3.8/include
+FFTW_LIBS  = -L/opt/ohpc/pub/libs/gnu9/openmpi4/fftw/3.3.8/lib
+HDF5_INCL  = -I$(HDF5_INC)
+HDF5_LIBS  = -L$(HDF5_LIB)
+HWLOC_INCL = -I$(HWLOC_INC) 
+HWLOC_LIBS = -L$(HWLOC_LIB) -lhwloc
+MAPS_INCL  = 
+MAPS_LIBS  = 

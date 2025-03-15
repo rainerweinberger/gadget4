@@ -202,6 +202,16 @@ include buildsystem/Makefile.comp.gcc
 include buildsystem/Makefile.path.bwforcluster
 endif
 
+ifeq ($(SYSTYPE),"macOShomebrew")
+include buildsystem/Makefile.comp.gcc
+include buildsystem/Makefile.path.macOShomebrew
+endif
+
+ifeq ($(SYSTYPE),"Newton21")
+include buildsystem/Makefile.comp.gcc
+include buildsystem/Makefile.path.Newton21
+endif
+
 
 ifndef LINKER
 LINKER = $(CPP)
