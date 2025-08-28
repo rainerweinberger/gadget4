@@ -1,0 +1,10 @@
+GSL_INCL   = 
+GSL_LIBS   = -lgsl -lgslcblas
+FFTW_INCL  = 
+FFTW_LIBS  = 
+HDF5_INCL  = -I/usr/include/hdf5/serial/
+HDF5_LIBS  = -L/usr/lib/x86_64-linux-gnu/hdf5/serial/
+HWLOC_INCL = 
+HWLOC_LIBS = 
+MAPS_INCL  = 
+MAPS_LIBS  = 

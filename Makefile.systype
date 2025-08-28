@@ -1,0 +1,6 @@
+# Select Target Computer 
+#
+# Please uncomment your system, i.e. remove "#". 
+
+#SYSTYPE="macOShomebrew"
+#SYSTYPE="Ubuntu"

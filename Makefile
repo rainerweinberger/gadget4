@@ -202,6 +202,11 @@ include buildsystem/Makefile.comp.gcc
 include buildsystem/Makefile.path.bwforcluster
 endif
 
+ifeq ($(SYSTYPE),"Ubuntu")
+include buildsystem/Makefile.comp.gcc
+include buildsystem/Makefile.path.Ubuntu
+endif
+
 ifeq ($(SYSTYPE),"macOShomebrew")
 include buildsystem/Makefile.comp.gcc
 include buildsystem/Makefile.path.macOShomebrew

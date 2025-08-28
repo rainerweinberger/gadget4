@@ -1,0 +1,49 @@
+# compiling the code on a new system can sometimes be challenging. Here a few commonly occuring errors:
+
+Problem:
+========
+
+The output starts with
+
+Build configuration:
+SYSTYPE: 
+CONFIG: examples/DM-L50-N128/Config.sh
+EXEC: Gadget4
+
+Solution:
+=========
+
+The SYSTYPE variable is not set. 
+Check the file Makefile.systype, and comment out the system type you are interested in.
+
+
+
+Problem:
+========
+
+fatal error: ’hdf5.h’ file not found
+
+or similar *.h files
+
+Solution:
+=========
+
+The include path which should lead to the header file of the respective libraries is incorrect.
+Check the respective path in ./buildsystem/Makefile.path.* (* depends on your SYSTYPE) and make sure 
+the "*_INCL" variable, in this case HDF5_INCL has a path that leads to the appropriate header file following -I.
+
+
+
+Problem:
+========
+
+error: linker command failed with exit code 1 (use -v to see invocation)
+
+SOLUTION:
+=========
+
+Scroll up to see which library.
+Check the respective path in ./buildsystem/Makefile.path.* (* depends on your SYSTYPE) and make sure 
+the "*_LIBS" variable, has a path that leads to the appropriate *.o or *.so files following -L.
+
+
