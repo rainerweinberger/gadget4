@@ -38,3 +38,5 @@
     CREATE_GRID
     IDS_32BIT
 
+# old style memory allocation (needed for Ubuntu linux)
+    OLDSTYLE_SHARED_MEMORY_ALLOCATION
